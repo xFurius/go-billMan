@@ -1,4 +1,5 @@
-<!DOCTYPE html>
+
+			<!DOCTYPE html>
 			<html lang="en">
 			<head>
 			<meta charset="UTF-8">
@@ -7,7 +8,16 @@
 			<link rel="stylesheet" href="./style.css">
 				<title>Document</title>
 			</head>
-			<body><input type="button" value="exit" id="btnExit">
+			<body>
+			<table>
+			<tr>
+			<th>ZA CO</th>
+			<th>ILE</th>
+			<th>NR KONTA</th>
+			<th>DO KIEDY</th>
+			</tr><tr><td>internet</td><td>200</td><td>241515</td><td>2022-10-10</td><td><input type=button value=USUN id=btnDel></td></tr><tr><td>telefon</td><td>566</td><td>3253125</td><td>2022-10-26</td><td><input type=button value=USUN id=btnDel></td></tr>
+			</table>
+			<input type="button" value="exit" id="btnExit">
 			<script>
 				document.addEventListener('astilectron-ready', function(){
 					btnExit.addEventListener('click', function(){
@@ -15,7 +25,6 @@
 					})
 				})
 			</script>
-			</body>
-			</html>
+			<input type=button onClick=window.location.reload()>
 			</body>
 			</html>

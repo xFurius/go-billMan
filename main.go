@@ -1,8 +1,10 @@
 package main
 
 import (
+	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/asticode/go-astikit"
 	"github.com/asticode/go-astilectron"
@@ -96,7 +98,7 @@ func listen() {
 					defer file.Close()
 
 					file.Write([]byte(tempMess))
-					file.Write([]byte("\n"))
+					file.Write([]byte("|"))
 				}
 				return nil
 			})
@@ -108,7 +110,8 @@ func listen() {
 			}
 			defer HTML.Close()
 
-			firstPart := `<!DOCTYPE html>
+			firstPart := `
+			<!DOCTYPE html>
 			<html lang="en">
 			<head>
 			<meta charset="UTF-8">
@@ -117,8 +120,18 @@ func listen() {
 			<link rel="stylesheet" href="./style.css">
 				<title>Document</title>
 			</head>
-			<body>`
-			lastPart := `<input type="button" value="exit" id="btnExit">
+			<body>
+			<table>
+			<tr>
+			<th>ZA CO</th>
+			<th>ILE</th>
+			<th>NR KONTA</th>
+			<th>DO KIEDY</th>
+			</tr>`
+
+			lastPart := `
+			</table>
+			<input type="button" value="exit" id="btnExit">
 			<script>
 				document.addEventListener('astilectron-ready', function(){
 					btnExit.addEventListener('click', function(){
@@ -126,13 +139,34 @@ func listen() {
 					})
 				})
 			</script>
-			</body>
-			</html>
+			<input type=button onClick=window.location.reload()>
 			</body>
 			</html>`
 
+			file, _ := os.Open("data.dat")
+			defer file.Close()
+
+			data, _ := ioutil.ReadAll(file)
+
+			split := strings.Split(string(data), "|")
+			log.Println(split)
+
+			var sB strings.Builder
+			sB.Write([]byte("<tr>"))
+			for i, v := range split {
+				if i%4 == 0 && i != 0 {
+					sB.Write([]byte("<td><input type=button value=USUN id=btnDel></td></tr><tr>"))
+				}
+				sB.Write([]byte("<td>"))
+				sB.Write([]byte(v))
+				sB.Write([]byte("</td>"))
+			}
+			sB.Write([]byte("<td><input type=button value=USUN id=btnDel></td></tr>"))
+
+			log.Println(sB.String())
+
 			HTML.Write([]byte(firstPart))
-			//data from file
+			HTML.Write([]byte(sB.String()))
 			HTML.Write([]byte(lastPart))
 
 			tempWindow, _ = app.NewWindow("./ui/showData.html", &astilectron.WindowOptions{
