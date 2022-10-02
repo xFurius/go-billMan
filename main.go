@@ -1,7 +1,7 @@
 package main
 
 import (
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"strings"
@@ -146,7 +146,7 @@ func listen() {
 			file, _ := os.Open("data.dat")
 			defer file.Close()
 
-			data, _ := ioutil.ReadAll(file)
+			data, _ := io.ReadAll(file)
 
 			split := strings.Split(string(data), "|")
 			log.Println(split)
