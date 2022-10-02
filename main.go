@@ -16,7 +16,7 @@ func main() {
 	app, _ = astilectron.New(log.New(os.Stderr, "", 0), astilectron.Options{
 		AppName:            "test",
 		VersionAstilectron: "0.49.0",
-		VersionElectron:    "6.1.2",
+		VersionElectron:    "20.0.0",
 	})
 	defer app.Close()
 
@@ -84,11 +84,72 @@ func listen() {
 				Resizable: astikit.BoolPtr(false)})
 			tempWindow.Create()
 			tempWindow.OnMessage(func(mes *astilectron.EventMessage) interface{} {
-				tempWindow.Close()
+				var tempMess string
+				mes.Unmarshal(&tempMess)
+				if tempMess == "exit" {
+					tempWindow.Close()
+				} else {
+					file, err := os.OpenFile("data.dat", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+					if err != nil {
+						log.Println(err)
+					}
+					defer file.Close()
+
+					file.Write([]byte(tempMess))
+					file.Write([]byte("\n"))
+				}
 				return nil
 			})
 		case "show-data":
 			log.Println("showing data")
+			HTML, err := os.OpenFile("./ui/showData.html", os.O_CREATE, 0644)
+			if err != nil {
+				log.Println(err)
+			}
+			defer HTML.Close()
+
+			firstPart := `<!DOCTYPE html>
+			<html lang="en">
+			<head>
+			<meta charset="UTF-8">
+			<meta http-equiv="X-UA-Compatible" content="IE=edge">
+			<meta name="viewport" content="width=device-width, initial-scale=1.0">
+			<link rel="stylesheet" href="./style.css">
+				<title>Document</title>
+			</head>
+			<body>`
+			lastPart := `<input type="button" value="exit" id="btnExit">
+			<script>
+				document.addEventListener('astilectron-ready', function(){
+					btnExit.addEventListener('click', function(){
+						astilectron.sendMessage("exit");
+					})
+				})
+			</script>
+			</body>
+			</html>
+			</body>
+			</html>`
+
+			HTML.Write([]byte(firstPart))
+			//data from file
+			HTML.Write([]byte(lastPart))
+
+			tempWindow, _ = app.NewWindow("./ui/showData.html", &astilectron.WindowOptions{
+				Center:    astikit.BoolPtr(true),
+				Height:    astikit.IntPtr(600),
+				Width:     astikit.IntPtr(600),
+				Resizable: astikit.BoolPtr(false)})
+			tempWindow.Create()
+
+			tempWindow.OnMessage(func(mes *astilectron.EventMessage) interface{} {
+				var tempMess string
+				mes.Unmarshal(&tempMess)
+				if tempMess == "exit" {
+					tempWindow.Close()
+				}
+				return nil
+			})
 		case "exit":
 			window.Close()
 			os.Exit(0)

@@ -9,12 +9,27 @@
 		<title>Document</title>
 	</head>
 	<body>
-	<h3>Add ndata</h3>
-    <input type="button" value="afsfaf" onclick="fu()">
+	<form id="add">
+		<p>za co<input type="text" id="first"></p>
+		<p>ile<input type="number" id="second"></p>
+		<p>nr konta<input type="text" id="third"></p>
+		<p>do kiedy<input type="date" id="fourth"></p>
+		<p><input type="submit" value="DODAJ" id="btnSend"></p>
+	</form>
+    <input type="button" value="exit" id="btnExit">
     <script>
-        function fu(){
-            astilectron.sendMessage("test");
-        }
+        document.addEventListener('astilectron-ready', function(){
+			btnExit.addEventListener('click', function(){
+				astilectron.sendMessage("exit");
+			})
+			btnSend.addEventListener('click', function(){
+				//sending form data
+				//using sendMessage mby
+				let mess = first.value+"|"+second.value+"|"+third.value+"|"+fourth.value;
+				astilectron.sendMessage(mess)
+			})
+
+		})
     </script>
 	</body>
 	</html>
