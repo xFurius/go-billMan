@@ -4,7 +4,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"strings"
 
 	"github.com/asticode/go-astikit"
 	"github.com/asticode/go-astilectron"
@@ -98,7 +97,8 @@ func listen() {
 					defer file.Close()
 
 					file.Write([]byte(tempMess))
-					file.Write([]byte("|"))
+					file.Write([]byte(`<td><input type="button" value="usun" id="btnDel"></td></tr>`))
+					file.Write([]byte("\n"))
 				}
 				return nil
 			})
@@ -132,10 +132,14 @@ func listen() {
 			lastPart := `
 			</table>
 			<input type="button" value="exit" id="btnExit">
+			<input type="button" value="save" id="btnSave">		
 			<script>
 				document.addEventListener('astilectron-ready', function(){
 					btnExit.addEventListener('click', function(){
 						astilectron.sendMessage("exit");
+					})
+					btnSave.addEventListener('click', function(){
+						astilectron.sendMessage("save");
 					})
 				})
 			</script>
@@ -148,25 +152,10 @@ func listen() {
 
 			data, _ := io.ReadAll(file)
 
-			split := strings.Split(string(data), "|")
-			log.Println(split)
-
-			var sB strings.Builder
-			sB.Write([]byte("<tr>"))
-			for i, v := range split {
-				if i%4 == 0 && i != 0 {
-					sB.Write([]byte("<td><input type=button value=USUN id=btnDel></td></tr><tr>"))
-				}
-				sB.Write([]byte("<td>"))
-				sB.Write([]byte(v))
-				sB.Write([]byte("</td>"))
-			}
-			sB.Write([]byte("<td><input type=button value=USUN id=btnDel></td></tr>"))
-
-			log.Println(sB.String())
+			log.Println(data)
 
 			HTML.Write([]byte(firstPart))
-			HTML.Write([]byte(sB.String()))
+			HTML.Write([]byte((data)))
 			HTML.Write([]byte(lastPart))
 
 			tempWindow, _ = app.NewWindow("./ui/showData.html", &astilectron.WindowOptions{
@@ -179,8 +168,23 @@ func listen() {
 			tempWindow.OnMessage(func(mes *astilectron.EventMessage) interface{} {
 				var tempMess string
 				mes.Unmarshal(&tempMess)
-				if tempMess == "exit" {
+				switch tempMess {
+				case "exit":
+					file.Close()
+					HTML.Close()
 					tempWindow.Close()
+				case "save":
+					// toSave := make([]byte, sB.Len())
+					// log.Println(toSave)
+					// HTML.ReadAt(toSave, int64(len(firstPart)))
+					// log.Println(string(toSave))
+
+					// var newString string
+					// replacer := strings.NewReplacer("<tr></td>", "|", "</td><td>", "|")
+					// newString = replacer.Replace(string(toSave))
+					// log.Println(newString)
+					HTML.Close()
+					file.Close()
 				}
 				return nil
 			})

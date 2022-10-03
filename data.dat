@@ -1,1 +1,2 @@
-internet|200|241515|2022-10-10|telefon|566|3253125|2022-10-26
+<tr><td>internet</td><td>23632</td><td>623623</td><td>2022-10-10</td><td><input type="button" value="usun" id="btnDel"></td></tr>
+<tr><td>telefonm</td><td>512</td><td>326632632</td><td>2022-10-12</td><td><input type="button" value="usun" id="btnDel"></td></tr>
