@@ -9,6 +9,8 @@ import (
 	"github.com/asticode/go-astilectron"
 )
 
+//mby split a code to files for clarity
+
 var window *astilectron.Window
 var app *astilectron.Astilectron
 
@@ -97,7 +99,8 @@ func listen() {
 					defer file.Close()
 
 					file.Write([]byte(tempMess))
-					file.Write([]byte(`<td><input type="button" value="usun" id="btnDel"></td></tr>`))
+					//TODO: saving button all with different ID
+					file.Write([]byte(`<td><input type="button" value="usun" id=""></td></tr>`))
 					file.Write([]byte("\n"))
 				}
 				return nil
@@ -108,7 +111,7 @@ func listen() {
 			if err != nil {
 				log.Println(err)
 			}
-			defer HTML.Close()
+			// defer HTML.Close()
 
 			firstPart := `
 			<!DOCTYPE html>
@@ -121,7 +124,7 @@ func listen() {
 				<title>Document</title>
 			</head>
 			<body>
-			<table>
+			<table id="dataTable">
 			<tr>
 			<th>ZA CO</th>
 			<th>ILE</th>
@@ -141,6 +144,7 @@ func listen() {
 					btnSave.addEventListener('click', function(){
 						astilectron.sendMessage("save");
 					})
+					})
 				})
 			</script>
 			<input type=button onClick=window.location.reload()>
@@ -148,11 +152,11 @@ func listen() {
 			</html>`
 
 			file, _ := os.Open("data.dat")
-			defer file.Close()
+			// defer file.Close()
 
 			data, _ := io.ReadAll(file)
 
-			log.Println(data)
+			log.Println(len(data))
 
 			HTML.Write([]byte(firstPart))
 			HTML.Write([]byte((data)))
@@ -174,15 +178,12 @@ func listen() {
 					HTML.Close()
 					tempWindow.Close()
 				case "save":
-					// toSave := make([]byte, sB.Len())
-					// log.Println(toSave)
-					// HTML.ReadAt(toSave, int64(len(firstPart)))
-					// log.Println(string(toSave))
+					//add deleting certain <tr></tr> from a file
+					offset := len(firstPart)
+					toSave := make([]byte, len(data))
+					HTML.ReadAt(toSave, int64(offset))
+					log.Println(string(toSave))
 
-					// var newString string
-					// replacer := strings.NewReplacer("<tr></td>", "|", "</td><td>", "|")
-					// newString = replacer.Replace(string(toSave))
-					// log.Println(newString)
 					HTML.Close()
 					file.Close()
 				}
