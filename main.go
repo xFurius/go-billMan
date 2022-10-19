@@ -15,8 +15,6 @@ import (
 	"github.com/asticode/go-astilectron"
 )
 
-//mby split a code to files for clarity
-
 var window *astilectron.Window
 var app *astilectron.Astilectron
 
@@ -127,50 +125,39 @@ func listen() {
 			}
 			defer HTML.Close()
 
-			// firstPart := `
-			// <!DOCTYPE html>
-			// <html lang="en">
-			// <head>
-			// <meta charset="UTF-8">
-			// <meta http-equiv="X-UA-Compatible" content="IE=edge">
-			// <meta name="viewport" content="width=device-width, initial-scale=1.0">
-			// <link rel="stylesheet" href="./style.css">
-			// 	<title>Document</title>
-			// </head>
-			// <body>
-			// <table id="dataTable">
-			// <tr>
-			// <th>ZA CO</th>
-			// <th>ILE</th>
-			// <th>NR KONTA</th>
-			// <th>DO KIEDY</th>
-			// </tr>`
+			firstPart := `
+			<!DOCTYPE html>
+			<html lang="en">
+			<head>
+			<meta charset="UTF-8">
+			<meta http-equiv="X-UA-Compatible" content="IE=edge">
+			<meta name="viewport" content="width=device-width, initial-scale=1.0">
+			<link rel="stylesheet" href="./style.css">
+				<title>Document</title>
+			</head>
+			<body>
+			<table id="dataTable">
+			<tr>
+			<th>ZA CO</th>
+			<th>ILE</th>
+			<th>NR KONTA</th>
+			<th>DO KIEDY</th>
+			</tr>`
 
-			// lastPart := `
-			// </table>
-			// <input type="button" value="exit" id="btnExit">
-			// <input type="button" value="save" id="btnSave">
-			// <script>
-			// 	document.addEventListener('astilectron-ready', function(){
-			// 		btnExit.addEventListener('click', function(){
-			// 			astilectron.sendMessage("exit");
-			// 		})
-			// 		btnSave.addEventListener('click', function(){
-			// 			astilectron.sendMessage("save");
-			// 			console.log("save");
-
-			// 			let rows = dataTable.rows.length - 1;
-
-			// 			console.log(rows);
-
-			// 			astilectron.sendMessage("rows")
-
-			// 		})
-			// 	})
-			// </script>
-			// <input type=button onClick=window.location.reload()>
-			// </body>
-			// </html>`
+			lastPart := `
+			</table>
+			<input type="button" value="exit" id="btnExit">
+			<input type="button" value="save" id="btnSave">
+			<script>
+				document.addEventListener('astilectron-ready', function(){
+					btnExit.addEventListener('click', function(){
+						astilectron.sendMessage("exit");
+					})
+				})
+			</script>
+			<input type=button onClick=window.location.reload()>
+			</body>
+			</html>`
 
 			file, _ := os.OpenFile("data.dat", os.O_RDONLY, 0644)
 			defer file.Close()
@@ -182,6 +169,20 @@ func listen() {
 			split := strings.Split(string(data), "\n")
 
 			log.Println(split)
+
+			HTML.WriteString(firstPart)
+			for _, v := range split {
+				log.Println(v)
+				tempSplit := strings.Split(v, "|")
+				HTML.WriteString("<tr>")
+				for _, val := range tempSplit {
+					HTML.WriteString("<td>")
+					HTML.WriteString(val)
+					HTML.WriteString("</td>")
+				}
+				HTML.WriteString("</tr>")
+			}
+			HTML.WriteString(lastPart)
 
 			// toRead := make([]string, 0)
 			// for _, v := range split {
@@ -205,23 +206,26 @@ func listen() {
 			// HTML.Write([]byte((data)))
 			// HTML.Write([]byte(lastPart))
 
-			// tempWindow, _ = app.NewWindow("./ui/showData.html", &astilectron.WindowOptions{
-			// 	Center:    astikit.BoolPtr(true),
-			// 	Height:    astikit.IntPtr(600),
-			// 	Width:     astikit.IntPtr(600),
-			// 	Resizable: astikit.BoolPtr(false)})
-			// tempWindow.Create()
+			tempWindow, _ = app.NewWindow("./ui/showData.html", &astilectron.WindowOptions{
+				Center:    astikit.BoolPtr(true),
+				Height:    astikit.IntPtr(600),
+				Width:     astikit.IntPtr(600),
+				Resizable: astikit.BoolPtr(false)})
+			tempWindow.Create()
 
 			// // tempWindow.OpenDevTools()
 
-			// tempWindow.OnMessage(func(mes *astilectron.EventMessage) interface{} {
-			// 	var tempMess string
-			// 	mes.Unmarshal(&tempMess)
-			// 	switch tempMess {
-			// 	case "exit":
-			// 		file.Close()
-			// 		HTML.Close()
-			// 		tempWindow.Close()
+			tempWindow.OnMessage(func(mes *astilectron.EventMessage) interface{} {
+				var tempMess string
+				mes.Unmarshal(&tempMess)
+
+				switch tempMess {
+				case "exit":
+					tempWindow.Close()
+				}
+				return nil
+			})
+
 			// 	case "save":
 			// 		tempWindow.On("window.event.message", func(e astilectron.Event) (deleteListener bool) {
 			// 			var t string

@@ -15,7 +15,7 @@
 			<th>ILE</th>
 			<th>NR KONTA</th>
 			<th>DO KIEDY</th>
-			</tr><tr><td></td><td></td><td></td><td></td><td><input type="button" value="DELETE"></td></tr>
+			</tr><tr><td>telefon</td><td>53</td><td>53223232</td><td>2022-10-19</td></tr><tr><td>telewizja</td><td>53</td><td>53223232</td><td>2022-10-19</td></tr><tr><td>internet</td><td>53</td><td>53223232</td><td>2022-10-19</td></tr>
 			</table>
 			<input type="button" value="exit" id="btnExit">
 			<input type="button" value="save" id="btnSave">
@@ -24,21 +24,8 @@
 					btnExit.addEventListener('click', function(){
 						astilectron.sendMessage("exit");
 					})
-					btnSave.addEventListener('click', function(){
-						astilectron.sendMessage("save");
-						console.log("save");
-
-						let rows = dataTable.rows.length - 1;
-
-						console.log(rows);
-
-						astilectron.sendMessage("rows")
-
-					})
 				})
 			</script>
 			<input type=button onClick=window.location.reload()>
-			</body>
-			</html>pe=button onClick=window.location.reload()>
 			</body>
 			</html>
