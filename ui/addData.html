@@ -5,30 +5,43 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" href="./style.css">
-	<script src="./script.js"></script>
 		<title>Document</title>
 	</head>
 	<body>
-	<form id="add">
-		<p>za co<input type="text" id="first"></p>
-		<p>ile<input type="number" id="second"></p>
-		<p>nr konta<input type="text" id="third"></p>
-		<p>do kiedy<input type="date" id="fourth"></p>
-		<p><input type="submit" value="DODAJ" id="btnSend"></p>
+	<form>
+		<p>za co<input type="text" id="service"></p>
+		<p>ile<input type="number" id="charge"></p>
+		<p>nr konta<input type="text" id="accountNum"></p>
+		<p>do kiedy<input type="date" id="due"></p>
+		<p><input type="button" value="DODAJ" id="sendData"></p>
 	</form>
     <input type="button" value="exit" id="btnExit">
+    <input type="button" value="test" id="t">
     <script>
         document.addEventListener('astilectron-ready', function(){
 			btnExit.addEventListener('click', function(){
 				astilectron.sendMessage("exit");
-			})
-			btnSend.addEventListener('click', function(){
-				//sending form data
-				//using sendMessage mby
-				let mess = "<tr><td>"+first.value+"</td><td>"+second.value+"</td><td>"+third.value+"</td><td>"+fourth.value+"</td>";
-				astilectron.sendMessage(mess)
-			})
+			});
 
+			sendData.addEventListener('click', ()=>{
+				const data = { 
+					service: service.value,
+					charge: charge.value,
+					accountNum: accountNum.value,
+					due: due.value
+				};
+	
+				fetch('http://localhost:8080/addData', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify(data),
+				}).then((response) => response.json())
+				.catch((error)=>{
+					console.error('Error:', error);
+				})
+			})
 		})
     </script>
 	</body>
