@@ -1,0 +1,48 @@
+
+			<!DOCTYPE html>
+			<html lang="en">
+			<head>
+			<meta charset="UTF-8">
+			<meta http-equiv="X-UA-Compatible" content="IE=edge">
+			<meta name="viewport" content="width=device-width, initial-scale=1.0">
+			<link rel="stylesheet" href="./style.css">
+				<title>Document</title>
+			</head>
+			<body>
+			<div id="tDiv">
+			<table id="dataTable">
+			<tr>
+			<th>Service</th>
+			<th>Charge</th>
+			<th>AccountNum</th>
+			<th>Due</th>
+			</tr><tr><td>telefon</td><td>523523</td><td>3523525</td><td>2022-10-11</td><td><button>DEL</button></td></tr><tr><td>telefon1</td><td>523523</td><td>3523525</td><td>2022-10-11</td><td><button>DEL</button></td></tr><tr><td>telefon12</td><td>523523</td><td>3523525</td><td>2022-10-11</td><td><button>DEL</button></td></tr><tr><td>telefon123</td><td>523523</td><td>3523525</td><td>2022-10-11</td><td><button>DEL</button></td></tr><tr><td>telefon1234</td><td>523523</td><td>3523525</td><td>2022-10-11</td><td><button>DEL</button></td></tr><tr><td>internet</td><td>532</td><td>523</td><td>2022-10-05</td><td><button>DEL</button></td></tr><tr><td>fas</td><td>235</td><td>235</td><td>2022-10-26</td><td><button>DEL</button></td></tr>
+			</table>
+			</div>
+			<button id="btnExit">EXIT</button>
+			<button id="btnSave">SAVE</button>
+			<script>
+				document.addEventListener('astilectron-ready', function(){
+					btnExit.addEventListener('click', function(){
+						astilectron.sendMessage("exit");
+					})
+
+					
+						var buttons = document.querySelectorAll('table button')
+	
+						console.log(buttons.length);
+	
+						
+						for(let i=0; i< buttons.length; i++){
+							buttons[i].addEventListener('click', ()=>{
+								console.log(i)
+								astilectron.sendMessage(i+"");
+							})
+						}
+	
+					
+				})
+			</script>
+			<input type=button onClick=window.location.reload()>
+			</body>
+			</html>

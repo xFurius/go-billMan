@@ -221,55 +221,29 @@ func listen() {
 				mes.Unmarshal(&tempMess)
 				log.Println(tempMess)
 
-				if tempMess == "exit" {
+				switch tempMess {
+				case "exit":
 					tempWindow.Close()
+				default:
+					log.Println(tempMess)
+					line, err := strconv.Atoi(tempMess)
+					if err != nil {
+						log.Println(err)
+					}
+					log.Println(line)
+					lines := bytes.Split(data, []byte("\n"))
+					log.Println(lines, len(lines))
+					del := removeLine(lines, line)
+					log.Println(del, len(del))
+
+					for _, v := range del {
+						file.Write(v)
+						file.WriteString("\n")
+					}
+
 					file.Close()
+
 				}
-
-				log.Println(tempMess)
-				line, err := strconv.Atoi(tempMess)
-				if err != nil {
-					log.Println(err)
-				}
-				log.Println(line)
-				lines := bytes.Split(data, []byte("\n"))
-				log.Println(lines, len(lines))
-				del := removeLine(lines, line)
-				log.Println(del, len(del))
-
-				for _, v := range del {
-					file.Write(v)
-					file.WriteString("\n")
-				}
-
-				file.Close()
-
-				// switch tempMess {
-				// case "exit":
-				// 	tempWindow.Close()
-				// default:
-				// 	// TO DO
-				// 	// Fix
-				// 	// tempMess is always ""
-				// 	log.Println(tempMess)
-				// 	line, err := strconv.Atoi(tempMess)
-				// 	if err != nil {
-				// 		log.Println(err)
-				// 	}
-				// 	log.Println(line)
-				// 	lines := bytes.Split(data, []byte("\n"))
-				// 	log.Println(lines, len(lines))
-				// 	del := removeLine(lines, line)
-				// 	log.Println(del, len(del))
-
-				// 	for _, v := range del {
-				// 		file.Write(v)
-				// 		file.WriteString("\n")
-				// 	}
-
-				// 	file.Close()
-
-				// }
 				return nil
 			})
 
