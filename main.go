@@ -2,6 +2,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -9,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"reflect"
+	"strconv"
 	"strings"
 
 	"github.com/asticode/go-astikit"
@@ -37,27 +39,31 @@ func addData(w http.ResponseWriter, r *http.Request) {
 
 	log.Println(r.Body)
 
+	// receiving form data
 	var data FormData
 	temp, _ := io.ReadAll(r.Body)
 	log.Println(string(temp))
 
 	json.Unmarshal(temp, &data)
 
-	fileData, err := os.OpenFile("data.dat", os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		log.Println(err)
-	}
-	defer fileData.Close()
+	// writing form data to a file
+	if data.Due != "" {
+		fileData, err := os.OpenFile("data.dat", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+		if err != nil {
+			log.Println(err)
+		}
+		defer fileData.Close()
 
-	v := reflect.ValueOf(data)
-	log.Println(v)
+		v := reflect.ValueOf(data)
+		log.Println(v)
 
-	for i := 0; i < 4; i++ {
-		if i == 3 {
-			fileData.WriteString(v.Field(i).String())
-			fileData.WriteString("\n")
-		} else {
-			fileData.WriteString(v.Field(i).String() + "|")
+		for i := 0; i < 4; i++ {
+			if i == 3 {
+				fileData.WriteString(v.Field(i).String())
+				fileData.WriteString("\n")
+			} else {
+				fileData.WriteString(v.Field(i).String() + "|")
+			}
 		}
 	}
 
@@ -95,7 +101,6 @@ func main() {
 func listen() {
 	window.OnMessage(func(m *astilectron.EventMessage) interface{} {
 		var tempWindow *astilectron.Window
-		// Unmarshal
 		var s string
 		m.Unmarshal(&s)
 
@@ -136,31 +141,48 @@ func listen() {
 				<title>Document</title>
 			</head>
 			<body>
+			<div id="tDiv">
 			<table id="dataTable">
 			<tr>
-			<th>ZA CO</th>
-			<th>ILE</th>
-			<th>NR KONTA</th>
-			<th>DO KIEDY</th>
+			<th>Service</th>
+			<th>Charge</th>
+			<th>AccountNum</th>
+			<th>Due</th>
 			</tr>`
 
 			lastPart := `
 			</table>
-			<input type="button" value="exit" id="btnExit">
-			<input type="button" value="save" id="btnSave">
+			</div>
+			<button id="btnExit">EXIT</button>
+			<button id="btnSave">SAVE</button>
 			<script>
 				document.addEventListener('astilectron-ready', function(){
 					btnExit.addEventListener('click', function(){
 						astilectron.sendMessage("exit");
 					})
+
+					
+						var buttons = document.querySelectorAll('table button')
+	
+						console.log(buttons.length);
+	
+						
+						for(let i=0; i< buttons.length; i++){
+							buttons[i].addEventListener('click', ()=>{
+								console.log(i)
+								astilectron.sendMessage(i+"");
+							})
+						}
+	
+					
 				})
 			</script>
 			<input type=button onClick=window.location.reload()>
 			</body>
 			</html>`
 
-			file, _ := os.OpenFile("data.dat", os.O_RDONLY, 0644)
-			defer file.Close()
+			file, _ := os.OpenFile("data.dat", os.O_APPEND, 0644)
+			// defer file.Close()
 
 			data, _ := io.ReadAll(file)
 
@@ -180,31 +202,10 @@ func listen() {
 					HTML.WriteString(val)
 					HTML.WriteString("</td>")
 				}
+				HTML.WriteString(`<td><button>DEL</button></td>`)
 				HTML.WriteString("</tr>")
 			}
 			HTML.WriteString(lastPart)
-
-			// toRead := make([]string, 0)
-			// for _, v := range split {
-			// 	temp := strings.Split(v, "/")
-			// 	toRead = append(toRead, temp...)
-			// }
-			// log.Println(toRead)
-
-			// HTML.Write([]byte("<tr>"))
-			// for i, v := range toRead {
-			// 	HTML.Write([]byte("<td>"))
-			// 	HTML.Write([]byte(v))
-			// 	HTML.Write([]byte("</td>"))
-			// 	if i%4 == 0 && i != 0 {
-			// 		HTML.Write([]byte("</tr><tr>"))
-			// 	}
-			// }
-			// HTML.Write([]byte("</tr>"))
-
-			// HTML.Write([]byte(firstPart))
-			// HTML.Write([]byte((data)))
-			// HTML.Write([]byte(lastPart))
 
 			tempWindow, _ = app.NewWindow("./ui/showData.html", &astilectron.WindowOptions{
 				Center:    astikit.BoolPtr(true),
@@ -213,30 +214,70 @@ func listen() {
 				Resizable: astikit.BoolPtr(false)})
 			tempWindow.Create()
 
-			// // tempWindow.OpenDevTools()
+			tempWindow.OpenDevTools()
 
 			tempWindow.OnMessage(func(mes *astilectron.EventMessage) interface{} {
 				var tempMess string
 				mes.Unmarshal(&tempMess)
+				log.Println(tempMess)
 
-				switch tempMess {
-				case "exit":
+				if tempMess == "exit" {
 					tempWindow.Close()
+					file.Close()
 				}
+
+				log.Println(tempMess)
+				line, err := strconv.Atoi(tempMess)
+				if err != nil {
+					log.Println(err)
+				}
+				log.Println(line)
+				lines := bytes.Split(data, []byte("\n"))
+				log.Println(lines, len(lines))
+				del := removeLine(lines, line)
+				log.Println(del, len(del))
+
+				for _, v := range del {
+					file.Write(v)
+					file.WriteString("\n")
+				}
+
+				file.Close()
+
+				// switch tempMess {
+				// case "exit":
+				// 	tempWindow.Close()
+				// default:
+				// 	// TO DO
+				// 	// Fix
+				// 	// tempMess is always ""
+				// 	log.Println(tempMess)
+				// 	line, err := strconv.Atoi(tempMess)
+				// 	if err != nil {
+				// 		log.Println(err)
+				// 	}
+				// 	log.Println(line)
+				// 	lines := bytes.Split(data, []byte("\n"))
+				// 	log.Println(lines, len(lines))
+				// 	del := removeLine(lines, line)
+				// 	log.Println(del, len(del))
+
+				// 	for _, v := range del {
+				// 		file.Write(v)
+				// 		file.WriteString("\n")
+				// 	}
+
+				// 	file.Close()
+
+				// }
 				return nil
 			})
 
-			// 	case "save":
-			// 		tempWindow.On("window.event.message", func(e astilectron.Event) (deleteListener bool) {
-			// 			var t string
-			// 			e.Message.Unmarshal(&t)
-			// 			log.Println(t)
-			// 			return true
-			// 		})
-
 			//add deleting certain <tr></tr> from a file
 
-			//cant use loop
+			// nth button
+			// nth button = nth row
+			// delete nth line form file
 
 			// offset := len(firstPart)
 			// toSave := make([]byte, len(data))
@@ -255,4 +296,11 @@ func listen() {
 
 		return nil
 	})
+}
+
+//  bytes.Split(data, "\n")
+
+func removeLine(s [][]byte, i int) [][]byte {
+	s[i] = s[len(s)-1]
+	return s[:len(s)-1]
 }
