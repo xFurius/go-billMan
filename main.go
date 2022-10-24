@@ -154,7 +154,6 @@ func listen() {
 			</table>
 			</div>
 			<button id="btnExit">EXIT</button>
-			<button id="btnSave">SAVE</button>
 			<script>
 				document.addEventListener('astilectron-ready', function(){
 					btnExit.addEventListener('click', function(){
@@ -195,15 +194,17 @@ func listen() {
 			HTML.WriteString(firstPart)
 			for _, v := range split {
 				log.Println(v)
-				tempSplit := strings.Split(v, "|")
-				HTML.WriteString("<tr>")
-				for _, val := range tempSplit {
-					HTML.WriteString("<td>")
-					HTML.WriteString(val)
-					HTML.WriteString("</td>")
+				if v != "" {
+					tempSplit := strings.Split(v, "|")
+					HTML.WriteString("<tr>")
+					for _, val := range tempSplit {
+						HTML.WriteString("<td>")
+						HTML.WriteString(val)
+						HTML.WriteString("</td>")
+					}
+					HTML.WriteString(`<td><button>DEL</button></td>`)
+					HTML.WriteString("</tr>")
 				}
-				HTML.WriteString(`<td><button>DEL</button></td>`)
-				HTML.WriteString("</tr>")
 			}
 			HTML.WriteString(lastPart)
 
@@ -214,7 +215,7 @@ func listen() {
 				Resizable: astikit.BoolPtr(false)})
 			tempWindow.Create()
 
-			tempWindow.OpenDevTools()
+			// tempWindow.OpenDevTools()
 
 			tempWindow.OnMessage(func(mes *astilectron.EventMessage) interface{} {
 				var tempMess string
@@ -246,23 +247,6 @@ func listen() {
 				}
 				return nil
 			})
-
-			//add deleting certain <tr></tr> from a file
-
-			// nth button
-			// nth button = nth row
-			// delete nth line form file
-
-			// offset := len(firstPart)
-			// toSave := make([]byte, len(data))
-			// HTML.ReadAt(toSave, int64(offset))
-			// log.Println(string(toSave))
-
-			// HTML.Close()
-			// file.Close()
-			// }
-			// return nil
-			// })
 		case "exit":
 			window.Close()
 			os.Exit(0)
