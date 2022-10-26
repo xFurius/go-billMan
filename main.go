@@ -160,20 +160,21 @@ func listen() {
 						astilectron.sendMessage("exit");
 					})
 
-					
 						var buttons = document.querySelectorAll('table button')
-	
+
 						console.log(buttons.length);
-	
-						
+
 						for(let i=0; i< buttons.length; i++){
 							buttons[i].addEventListener('click', ()=>{
+								let btn = buttons[i];
 								console.log(i)
 								astilectron.sendMessage(i+"");
+								btn.textContent = "Deleted";
+								btn.disabled = true;
+								btn.className = "btnDisabled";
 							})
 						}
-	
-					
+
 				})
 			</script>
 			<input type=button onClick=window.location.reload()>
@@ -181,7 +182,7 @@ func listen() {
 			</html>`
 
 			file, _ := os.OpenFile("data.dat", os.O_APPEND, 0644)
-			// defer file.Close()
+			defer file.Close()
 
 			data, _ := io.ReadAll(file)
 
@@ -191,6 +192,7 @@ func listen() {
 
 			log.Println(split)
 
+			os.Truncate(HTML.Name(), 0)
 			HTML.WriteString(firstPart)
 			for _, v := range split {
 				log.Println(v)
@@ -215,7 +217,7 @@ func listen() {
 				Resizable: astikit.BoolPtr(false)})
 			tempWindow.Create()
 
-			// tempWindow.OpenDevTools()
+			tempWindow.OpenDevTools()
 
 			tempWindow.OnMessage(func(mes *astilectron.EventMessage) interface{} {
 				var tempMess string
@@ -226,6 +228,11 @@ func listen() {
 				case "exit":
 					tempWindow.Close()
 				default:
+					file, _ := os.OpenFile("data.dat", os.O_APPEND, 0644)
+					defer file.Close()
+
+					data, _ := io.ReadAll(file)
+
 					log.Println(tempMess)
 					line, err := strconv.Atoi(tempMess)
 					if err != nil {
@@ -237,14 +244,16 @@ func listen() {
 					del := removeLine(lines, line)
 					log.Println(del, len(del))
 
+					os.Truncate(file.Name(), 0)
 					for _, v := range del {
-						file.Write(v)
-						file.WriteString("\n")
+						if string(v) != "" {
+							file.Write(v)
+							file.WriteString("\n")
+						}
 					}
-
-					file.Close()
-
 				}
+
+				file.Close()
 				return nil
 			})
 		case "exit":
@@ -259,6 +268,10 @@ func listen() {
 //  bytes.Split(data, "\n")
 
 func removeLine(s [][]byte, i int) [][]byte {
+	log.Println("i: ", i, ", len(s): ", len(s))
+	if i == len(s)-1 {
+		return s[:len(s)-2]
+	}
 	s[i] = s[len(s)-1]
 	return s[:len(s)-1]
 }
