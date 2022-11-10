@@ -164,7 +164,6 @@ func events() {
 			</div>
 			<div class="btns">
 			<input type="button" value="EXIT" id="btnExit">
-			<input type="button" onClick="location.reload()">
 			</div>
 			<script>
 				document.addEventListener('astilectron-ready', function(){
