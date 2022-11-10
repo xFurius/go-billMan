@@ -5,18 +5,19 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" href="./style.css">
-		<title>Document</title>
+		<title>ADD DATA</title>
 	</head>
 	<body>
 	<form>
-		<p>Service<input type="text" id="service"></p>
-		<p>Charge<input type="number" id="charge"></p>
-		<p>AccountNum<input type="text" id="accountNum"></p>
-		<p>Due<input type="date" id="due"></p>
-		<p><input type="button" value="DODAJ" id="sendData"></p>
+		<p>Service   <input type="text" id="service"></p>
+		<p>Charge   <input type="number" id="charge"></p>
+		<p>AccountNum   <input type="text" id="accountNum"></p>
+		<p>Due   <input type="date" id="due"></p>
 	</form>
-    <input type="button" value="exit" id="btnExit">
-    <input type="button" value="test" id="t">
+	<div class="btns">
+	<input type="button" value="ADD" id="sendData">
+    <input type="button" value="EXIT" id="btnExit">
+</div>
     <script>
         document.addEventListener('astilectron-ready', function(){
 			btnExit.addEventListener('click', function(){
@@ -37,14 +38,13 @@
 						'Content-Type': 'application/json',
 					},
 					body: JSON.stringify(data),
-				}).then((response) => response.json())
+				})
+				.then((response) => response.json())
 				.catch((error)=>{
 					console.error('Error:', error);
 				})
 			})
 		})
     </script>
-	</body>
-	</html>
 	</body>
 	</html>

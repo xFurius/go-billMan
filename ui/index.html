@@ -5,14 +5,31 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" href="./style.css">
-	<script src="./script.js"></script>
-		<title>Document</title>
+		<title>INDEX</title>
 	</head>
 	<body>
+		<div>
+			<img src="./banner.png">
+		</div>
+		<div class="btns">
 	<input type="button" value="Add Data" id="btnAdd">
 	<input type="button" value="Show Data" id="btnShow">
 	<input type="button" value="Exit" id="btnExit">
+</div>
+
+	<script>
+		document.addEventListener('astilectron-ready', function(){
+    		btnAdd.addEventListener("click", () => {
+            	astilectron.sendMessage("add-data");
+        	})
+        	btnShow.addEventListener("click", () => {
+                astilectron.sendMessage("show-data");
+            })
+            btnExit.addEventListener("click", () => {
+                astilectron.sendMessage("exit");
+            })
+    })
+	</script>
+
 	</body>
-	</html>
-</body>
 	</html>
