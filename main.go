@@ -27,6 +27,7 @@ type FormData struct {
 	Due        string `json:"due"`
 }
 
+// handling /addData route
 func addData(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "text/html")
 	file, err := os.Open("./ui/addData.html")
@@ -69,8 +70,20 @@ func addData(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func loadCSS(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "text/css")
+	file, err := os.Open("./ui/style.css")
+	if err != nil {
+		log.Println(err)
+	}
+	defer file.Close()
+	css, _ := io.ReadAll(file)
+	fmt.Fprintln(w, string(css))
+}
+
 func main() {
 	http.HandleFunc("/addData", addData)
+	http.HandleFunc("/style.css", loadCSS)
 	go http.ListenAndServe(":8080", nil)
 
 	app, _ = astilectron.New(log.New(os.Stderr, "", 0), astilectron.Options{
@@ -81,7 +94,6 @@ func main() {
 	defer app.Close()
 
 	app.Start()
-	// http://localhost:8080/index
 	window, _ = app.NewWindow("./ui/index.html", &astilectron.WindowOptions{
 		Center:    astikit.BoolPtr(true),
 		Height:    astikit.IntPtr(600),
@@ -91,14 +103,11 @@ func main() {
 	window.Create()
 	defer window.Close()
 
-	listen()
-
-	// window.OpenDevTools()
-
+	events()
 	app.Wait()
 }
 
-func listen() {
+func events() {
 	window.OnMessage(func(m *astilectron.EventMessage) interface{} {
 		var tempWindow *astilectron.Window
 		var s string
@@ -113,7 +122,7 @@ func listen() {
 				Width:     astikit.IntPtr(600),
 				Resizable: astikit.BoolPtr(false)})
 			tempWindow.Create()
-			// tempWindow.OpenDevTools()
+
 			tempWindow.OnMessage(func(mes *astilectron.EventMessage) interface{} {
 				var mess string
 				mes.Unmarshal(&mess)
@@ -138,11 +147,11 @@ func listen() {
 			<meta http-equiv="X-UA-Compatible" content="IE=edge">
 			<meta name="viewport" content="width=device-width, initial-scale=1.0">
 			<link rel="stylesheet" href="./style.css">
-				<title>Document</title>
+				<title>SHOW DATA</title>
 			</head>
 			<body>
-			<div id="tDiv">
-			<table id="dataTable">
+			<div>
+			<table>
 			<tr>
 			<th>Service</th>
 			<th>Charge</th>
@@ -153,7 +162,10 @@ func listen() {
 			lastPart := `
 			</table>
 			</div>
-			<button id="btnExit">EXIT</button>
+			<div class="btns">
+			<input type="button" value="EXIT" id="btnExit">
+			<input type="button" onClick="location.reload()">
+			</div>
 			<script>
 				document.addEventListener('astilectron-ready', function(){
 					btnExit.addEventListener('click', function(){
@@ -177,7 +189,6 @@ func listen() {
 
 				})
 			</script>
-			<input type=button onClick=window.location.reload()>
 			</body>
 			</html>`
 
@@ -204,7 +215,7 @@ func listen() {
 						HTML.WriteString(val)
 						HTML.WriteString("</td>")
 					}
-					HTML.WriteString(`<td><button>DEL</button></td>`)
+					HTML.WriteString(`<td><button>DELETE</button></td>`)
 					HTML.WriteString("</tr>")
 				}
 			}
@@ -216,8 +227,6 @@ func listen() {
 				Width:     astikit.IntPtr(600),
 				Resizable: astikit.BoolPtr(false)})
 			tempWindow.Create()
-
-			tempWindow.OpenDevTools()
 
 			tempWindow.OnMessage(func(mes *astilectron.EventMessage) interface{} {
 				var tempMess string
@@ -264,8 +273,6 @@ func listen() {
 		return nil
 	})
 }
-
-//  bytes.Split(data, "\n")
 
 func removeLine(s [][]byte, i int) [][]byte {
 	log.Println("i: ", i, ", len(s): ", len(s))
