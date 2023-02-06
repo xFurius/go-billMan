@@ -12,6 +12,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"text/template"
 
 	"github.com/asticode/go-astikit"
 	"github.com/asticode/go-astilectron"
@@ -84,6 +85,29 @@ func loadCSS(w http.ResponseWriter, r *http.Request) {
 func main() {
 	http.HandleFunc("/addData", addData)
 	http.HandleFunc("/style.css", loadCSS)
+	http.HandleFunc("/showData", func(w http.ResponseWriter, r *http.Request) {
+		file, _ := os.OpenFile("data.dat", os.O_APPEND, 0644)
+		defer file.Close()
+		data, _ := io.ReadAll(file)
+		fmt.Println(data)
+		split := strings.Split(string(data), "\n")
+		log.Println(split)
+
+		dataSlice := make([][]string, 0)
+		for _, v := range split {
+			if v != "" {
+				dataSlice = append(dataSlice, strings.Split(v, "|"))
+			}
+		}
+
+		fmt.Println(dataSlice)
+
+		tmplt, err := template.ParseFiles("./ui/showData.html")
+		if err != nil {
+			fmt.Println(err)
+		}
+		tmplt.Execute(w, dataSlice)
+	})
 	go http.ListenAndServe(":8080", nil)
 
 	app, _ = astilectron.New(log.New(os.Stderr, "", 0), astilectron.Options{
@@ -132,95 +156,7 @@ func events() {
 				return nil
 			})
 		case "show-data":
-			log.Println("showing data")
-			HTML, err := os.OpenFile("./ui/showData.html", os.O_CREATE, 0644)
-			if err != nil {
-				log.Println(err)
-			}
-			defer HTML.Close()
-
-			firstPart := `
-			<!DOCTYPE html>
-			<html lang="en">
-			<head>
-			<meta charset="UTF-8">
-			<meta http-equiv="X-UA-Compatible" content="IE=edge">
-			<meta name="viewport" content="width=device-width, initial-scale=1.0">
-			<link rel="stylesheet" href="./style.css">
-				<title>SHOW DATA</title>
-			</head>
-			<body>
-			<div>
-			<table>
-			<tr>
-			<th>Service</th>
-			<th>Charge</th>
-			<th>AccountNum</th>
-			<th>Due</th>
-			</tr>`
-
-			lastPart := `
-			</table>
-			</div>
-			<div class="btns">
-			<input type="button" value="EXIT" id="btnExit">
-			</div>
-			<script>
-				document.addEventListener('astilectron-ready', function(){
-					btnExit.addEventListener('click', function(){
-						astilectron.sendMessage("exit");
-					})
-
-						var buttons = document.querySelectorAll('table button')
-
-						console.log(buttons.length);
-
-						for(let i=0; i< buttons.length; i++){
-							buttons[i].addEventListener('click', ()=>{
-								let btn = buttons[i];
-								console.log(i)
-								astilectron.sendMessage(i+"");
-								btn.textContent = "Deleted";
-								btn.disabled = true;
-								btn.className = "btnDisabled";
-							})
-						}
-
-				})
-			</script>
-			</body>
-			</html>`
-
-			file, _ := os.OpenFile("data.dat", os.O_APPEND, 0644)
-			defer file.Close()
-
-			data, _ := io.ReadAll(file)
-
-			log.Println(string(data))
-
-			split := strings.Split(string(data), "\n")
-
-			log.Println(split)
-
-			os.Truncate(HTML.Name(), 0)
-			HTML.WriteString(firstPart)
-			for _, v := range split {
-				log.Println(v)
-				if v != "" {
-					tempSplit := strings.Split(v, "|")
-					HTML.WriteString("<tr>")
-					for _, val := range tempSplit {
-						HTML.WriteString("<td>")
-						HTML.WriteString(val)
-						HTML.WriteString("</td>")
-					}
-					HTML.WriteString(`<td><button>DELETE</button></td>`)
-					HTML.WriteString("</tr>")
-				}
-			}
-			HTML.WriteString(lastPart)
-
-			tempWindow, _ = app.NewWindow("./ui/showData.html", &astilectron.WindowOptions{
+			tempWindow, _ = app.NewWindow("http://localhost:8080/showData", &astilectron.WindowOptions{
 				Center:    astikit.BoolPtr(true),
 				Height:    astikit.IntPtr(600),
 				Width:     astikit.IntPtr(600),
@@ -261,7 +197,7 @@ func events() {
 					}
 				}
 
-				file.Close()
+				// file.Close()
 				return nil
 			})
 		case "exit":
